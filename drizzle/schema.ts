@@ -25,4 +25,35 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Bookings table — one row per confirmed court reservation.
+ * A booking is only inserted after a successful Stripe payment webhook.
+ */
+export const bookings = mysqlTable("bookings", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Customer display name */
+  customerName: varchar("customerName", { length: 255 }).notNull(),
+  /** Customer email address */
+  customerEmail: varchar("customerEmail", { length: 320 }).notNull(),
+  /** ISO date string YYYY-MM-DD for the booking date */
+  bookingDate: varchar("bookingDate", { length: 10 }).notNull(),
+  /** Start hour in 24h format (e.g. 9 = 9:00 AM, 14 = 2:00 PM) */
+  startHour: int("startHour").notNull(),
+  /** Duration in hours: 1 or 2 */
+  durationHours: int("durationHours").notNull(),
+  /** Amount paid in cents (2000 = $20, 4000 = $40) */
+  amountPaid: int("amountPaid").notNull(),
+  /** Stripe Checkout Session ID — used for confirmation page lookup */
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }).notNull().unique(),
+  /** Stripe Payment Intent ID for reference */
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  /** Booking status */
+  status: mysqlEnum("status", ["confirmed", "cancelled"]).default("confirmed").notNull(),
+  /** Optional admin notes */
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Booking = typeof bookings.$inferSelect;
+export type InsertBooking = typeof bookings.$inferInsert;

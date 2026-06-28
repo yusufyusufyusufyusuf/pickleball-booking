@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { and, eq, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { bookings, InsertBooking, InsertUser, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,128 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ─── Booking helpers ──────────────────────────────────────────────────────────
+
+/**
+ * Returns all confirmed bookings for a given date so the frontend can
+ * compute which slots are already taken.
+ */
+export async function getBookingsForDate(date: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(bookings)
+    .where(and(eq(bookings.bookingDate, date), eq(bookings.status, "confirmed")));
+}
+
+/**
+ * Returns a single booking by its Stripe session ID.
+ * Used on the confirmation page after a successful checkout.
+ */
+export async function getBookingBySessionId(sessionId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(bookings)
+    .where(eq(bookings.stripeSessionId, sessionId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Inserts a new booking record. Called exclusively from the Stripe webhook
+ * handler after payment confirmation.
+ */
+export async function createBooking(data: InsertBooking) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(bookings).values(data);
+}
+
+/**
+ * Returns all bookings (all statuses) for admin dashboard.
+ */
+export async function getAllBookings() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(bookings).orderBy(bookings.bookingDate, bookings.startHour);
+}
+
+/**
+ * Returns bookings within a date range for admin calendar view.
+ */
+export async function getBookingsInRange(startDate: string, endDate: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(bookings)
+    .where(
+      and(
+        gte(bookings.bookingDate, startDate),
+        lte(bookings.bookingDate, endDate),
+        eq(bookings.status, "confirmed")
+      )
+    )
+    .orderBy(bookings.bookingDate, bookings.startHour);
+}
+
+/**
+ * Cancels a booking by ID.
+ */
+export async function cancelBooking(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(bookings).set({ status: "cancelled" }).where(eq(bookings.id, id));
+}
+
+/**
+ * Manually creates a booking (admin use — no Stripe session required).
+ * Uses a synthetic session ID prefixed with "manual_".
+ */
+export async function adminCreateBooking(data: Omit<InsertBooking, "stripeSessionId">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const syntheticId = `manual_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  await db.insert(bookings).values({ ...data, stripeSessionId: syntheticId });
+}
+
+/**
+ * Checks whether a given time slot conflicts with existing confirmed bookings.
+ */
+export async function isSlotAvailable(
+  date: string,
+  startHour: number,
+  durationHours: number
+): Promise<boolean> {
+  const existing = await getBookingsForDate(date);
+  for (const b of existing) {
+    const bEnd = b.startHour + b.durationHours;
+    const newEnd = startHour + durationHours;
+    if (startHour < bEnd && b.startHour < newEnd) return false;
+  }
+  return true;
+}
+
+/**
+ * Returns aggregate stats for the admin dashboard.
+ */
+export async function getBookingStats() {
+  const db = await getDb();
+  if (!db) return { total: 0, revenue: 0, todayCount: 0, upcomingCount: 0 };
+
+  const today = new Date().toISOString().slice(0, 10);
+  const all = await db.select().from(bookings).where(eq(bookings.status, "confirmed"));
+  const todayBookings = all.filter((b) => b.bookingDate === today);
+  const upcoming = all.filter((b) => b.bookingDate >= today);
+  const revenue = all.reduce((sum, b) => sum + b.amountPaid, 0);
+
+  return {
+    total: all.length,
+    revenue,
+    todayCount: todayBookings.length,
+    upcomingCount: upcoming.length,
+  };
+}
