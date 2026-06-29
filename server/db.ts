@@ -123,10 +123,11 @@ export async function getBookingBySessionId(sessionId: string) {
  * Inserts a new booking record. Called exclusively from the Stripe webhook
  * handler after payment confirmation.
  */
-export async function createBooking(data: InsertBooking) {
+export async function createBooking(data: InsertBooking): Promise<{ id: number }> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.insert(bookings).values(data);
+  const result = await db.insert(bookings).values(data);
+  return { id: (result as any)[0]?.insertId ?? 0 };
 }
 
 /**

@@ -1,6 +1,8 @@
 import { Express, Request, Response } from "express";
 import Stripe from "stripe";
 import { createBooking, getBookingBySessionId } from "./db";
+import { sendBookingConfirmation } from "./email";
+import { notifyOwner } from "./_core/notification";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-06-24.dahlia",
@@ -82,7 +84,7 @@ export function registerStripeWebhook(app: Express) {
         }
 
         try {
-          await createBooking({
+          const booking = await createBooking({
             customerName,
             customerEmail,
             bookingDate,
@@ -97,6 +99,29 @@ export function registerStripeWebhook(app: Express) {
             status: "confirmed",
           });
           console.log(`[Webhook] Booking created for session: ${session.id}`);
+
+          // Build a short human-readable reference
+          const bookingRef = session.id.startsWith("manual_")
+            ? `#${booking.id}`
+            : session.id.slice(-12).toUpperCase();
+
+          // Send customer confirmation email (non-blocking)
+          sendBookingConfirmation({
+            customerName,
+            customerEmail,
+            bookingDate,
+            startHour,
+            durationHours: durationHours as 1 | 2,
+            amountPaid,
+            bookingRef,
+          }).catch((e) => console.error("[Email] Unexpected error:", e));
+
+          // Notify the owner of the new booking
+          notifyOwner({
+            title: `New booking: ${customerName}`,
+            content: `${customerName} (${customerEmail}) booked the court on ${bookingDate} from ${startHour}:00 for ${durationHours}h. Paid: $${(amountPaid / 100).toFixed(2)}.`,
+          }).catch((e) => console.error("[Notification] Unexpected error:", e));
+
         } catch (err: any) {
           console.error("[Webhook] Failed to create booking:", err.message);
           return res.status(500).json({ error: "Failed to record booking" });

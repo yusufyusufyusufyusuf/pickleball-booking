@@ -54,3 +54,11 @@
 - [x] Vitest: slot availability logic
 - [x] Vitest: booking creation after webhook
 - [x] Vitest: admin role gate
+
+## Customer Email Notifications
+- [x] Install resend npm package
+- [x] Add RESEND_API_KEY secret
+- [x] Create server/email.ts with sendBookingConfirmation helper (HTML template)
+- [x] Call sendBookingConfirmation in Stripe webhook after booking is created
+- [x] Also send owner notification via notifyOwner on new booking
+- [x] Write Vitest test for email helper
