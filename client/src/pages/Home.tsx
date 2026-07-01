@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, CreditCard, ShieldCheck, ArrowRight, Star } from "lucide-react";
+import { MapPin, Clock, CreditCard, ShieldCheck, ArrowRight, Star, Sparkles, Trophy, Zap, Bell } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Home() {
   return (
@@ -115,6 +117,74 @@ export default function Home() {
 
       <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
+      {/* Membership Coming Soon */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        {/* Background decoration */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, oklch(0.35 0.1 155) 1px, transparent 0)`,
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container relative">
+          <div className="max-w-3xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/30 text-accent-foreground text-xs font-semibold mb-5">
+                <Sparkles className="w-3 h-3 fill-accent text-accent" />
+                Coming Soon
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-3">
+                Membership Plans
+              </h2>
+              <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+                Unlock unlimited court access, priority booking, and exclusive member perks — all in one plan.
+              </p>
+            </div>
+
+            {/* Membership tier cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+              <MembershipCard
+                tier="Silver"
+                icon={<Zap className="w-5 h-5" />}
+                color="from-slate-100 to-slate-50"
+                borderColor="border-slate-200"
+                iconBg="bg-slate-200"
+                iconColor="text-slate-600"
+                perks={["8 court hours / month", "Priority booking window", "Member-only rates"]}
+              />
+              <MembershipCard
+                tier="Gold"
+                icon={<Trophy className="w-5 h-5" />}
+                color="from-amber-50 to-yellow-50"
+                borderColor="border-amber-200"
+                iconBg="bg-amber-100"
+                iconColor="text-amber-600"
+                featured
+                perks={["20 court hours / month", "48-hr advance booking", "Guest passes included", "Equipment locker"]}
+              />
+              <MembershipCard
+                tier="Platinum"
+                icon={<Star className="w-5 h-5" />}
+                color="from-primary/10 to-primary/5"
+                borderColor="border-primary/20"
+                iconBg="bg-primary/15"
+                iconColor="text-primary"
+                perks={["Unlimited court hours", "Instant booking anytime", "Unlimited guest passes", "Private coaching sessions"]}
+              />
+            </div>
+
+            {/* Notify me form */}
+            <NotifyMeForm />
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
       {/* Features */}
       <section className="py-16 md:py-20 bg-muted/30">
         <div className="container">
@@ -151,6 +221,97 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">{icon}</div>
       <h3 className="font-semibold text-foreground mb-1">{title}</h3>
       <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+    </div>
+  );
+}
+
+type MembershipCardProps = {
+  tier: string;
+  icon: React.ReactNode;
+  color: string;
+  borderColor: string;
+  iconBg: string;
+  iconColor: string;
+  perks: string[];
+  featured?: boolean;
+};
+
+function MembershipCard({ tier, icon, color, borderColor, iconBg, iconColor, perks, featured }: MembershipCardProps) {
+  return (
+    <div
+      className={`relative rounded-2xl border ${borderColor} bg-gradient-to-b ${color} p-6 flex flex-col gap-4 transition-transform duration-200 hover:-translate-y-1 ${
+        featured ? "ring-2 ring-amber-300 shadow-lg" : "shadow-sm"
+      }`}
+    >
+      {featured && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wide shadow-sm">
+          Most Popular
+        </div>
+      )}
+      <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center ${iconColor}`}>
+        {icon}
+      </div>
+      <div>
+        <h3 className="font-serif text-lg font-semibold text-foreground">{tier}</h3>
+        <p className="text-xs text-muted-foreground mt-0.5 font-medium uppercase tracking-wide">Membership</p>
+      </div>
+      <ul className="space-y-2 flex-1">
+        {perks.map((perk) => (
+          <li key={perk} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+            {perk}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-2 rounded-xl border border-dashed border-muted-foreground/30 bg-white/50 py-2.5 text-center text-xs font-medium text-muted-foreground">
+        Pricing announced soon
+      </div>
+    </div>
+  );
+}
+
+function NotifyMeForm() {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSubmitted(true);
+    toast.success("You're on the list!", {
+      description: "We'll notify you the moment memberships go live.",
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-border shadow-sm p-6 md:p-8 text-center">
+      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+        <Bell className="w-5 h-5 text-primary" />
+      </div>
+      <h3 className="font-serif text-xl font-semibold text-foreground mb-2">Get Notified First</h3>
+      <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto">
+        Be the first to know when memberships launch. Early members get a special founding rate.
+      </p>
+      {submitted ? (
+        <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium">
+          <ShieldCheck className="w-4 h-4" />
+          You're on the list — we'll be in touch!
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            className="flex-1 h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          />
+          <Button type="submit" size="sm" className="h-10 px-5 shrink-0">
+            Notify Me
+          </Button>
+        </form>
+      )}
     </div>
   );
 }
