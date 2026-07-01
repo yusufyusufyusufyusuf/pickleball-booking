@@ -106,7 +106,7 @@ export default function BookingPage() {
     });
   };
 
-  const priceLabel = selectedDuration === 1 ? "$20" : selectedDuration === 2 ? "$40" : "";
+  const priceLabel = selectedDuration === 1 ? "$20" : selectedDuration === 2 ? "$35" : "";
 
   return (
     <div className="min-h-screen bg-background">
@@ -243,7 +243,7 @@ export default function BookingPage() {
                             selectedDuration === dur ? "text-primary" : "text-foreground"
                           }`}
                         >
-                          ${dur === 1 ? "20" : "40"}
+                          ${dur === 1 ? "20" : "35"}
                         </div>
                       </div>
                     </button>
@@ -305,7 +305,7 @@ export default function BookingPage() {
                   <p className="text-sm font-medium text-primary flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     {formatHour(selectedHour)} – {formatHour(selectedHour + selectedDuration)} ·{" "}
-                    {selectedDuration} hour{selectedDuration > 1 ? "s" : ""} · ${selectedDuration === 1 ? "20" : "40"}
+                    {selectedDuration} hour{selectedDuration > 1 ? "s" : ""} · ${selectedDuration === 1 ? "20" : "35"}
                   </p>
                 </div>
               )}

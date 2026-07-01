@@ -103,7 +103,7 @@ export default function Home() {
                   <h3 className="font-serif text-xl font-semibold text-primary-foreground">2 Hours</h3>
                   <p className="text-primary-foreground/70 text-sm mt-1">Extended play session</p>
                 </div>
-                <span className="font-serif text-3xl font-bold text-primary-foreground">$40</span>
+                <span className="font-serif text-3xl font-bold text-primary-foreground">$35</span>
               </div>
               <ul className="space-y-2 text-sm text-primary-foreground/80 mb-5">
                 <li className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-primary-foreground" />Full court access</li>

@@ -90,11 +90,11 @@ describe("sendBookingConfirmation", () => {
   it("includes 2-hour duration details correctly", async () => {
     mockSend.mockResolvedValue({ data: { id: "email_456" }, error: null });
 
-    const twoHourData = { ...sampleData, durationHours: 2 as const, amountPaid: 4000 };
+    const twoHourData = { ...sampleData, durationHours: 2 as const, amountPaid: 3500 };
     await sendBookingConfirmation(twoHourData);
 
     const callArgs = mockSend.mock.calls[0][0];
-    expect(callArgs.html).toContain("$40.00");
+    expect(callArgs.html).toContain("$35.00");
     expect(callArgs.html).toContain("2 hours");
     expect(callArgs.text).toContain("2 hours");
   });

@@ -634,7 +634,7 @@ export default function AdminDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="1">1 hour — $20</SelectItem>
-                    <SelectItem value="2">2 hours — $40</SelectItem>
+                    <SelectItem value="2">2 hours — $35</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

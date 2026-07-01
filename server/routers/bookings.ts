@@ -22,7 +22,7 @@ const COURT_CLOSE_HOUR = 21; // exclusive end
 
 const PRICES = {
   1: 2000, // $20.00 in cents
-  2: 4000, // $40.00 in cents
+  2: 3500, // $35.00 in cents
 } as const;
 
 function adminProcedure() {

@@ -83,15 +83,15 @@ describe("Slot availability logic", () => {
 
 // ─── Pricing constants ────────────────────────────────────────────────────────
 
-const PRICES: Record<1 | 2, number> = { 1: 2000, 2: 4000 };
+const PRICES: Record<1 | 2, number> = { 1: 2000, 2: 3500 };
 
 describe("Pricing constants", () => {
   it("charges $20 (2000 cents) for 1 hour", () => {
     expect(PRICES[1]).toBe(2000);
   });
 
-  it("charges $40 (4000 cents) for 2 hours", () => {
-    expect(PRICES[2]).toBe(4000);
+  it("charges $35 (3500 cents) for 2 hours", () => {
+    expect(PRICES[2]).toBe(3500);
   });
 });
 
