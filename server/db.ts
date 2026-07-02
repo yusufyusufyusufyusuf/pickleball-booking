@@ -1,6 +1,6 @@
 import { and, eq, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { bookings, InsertBooking, InsertUser, users } from "../drizzle/schema";
+import { bookings, InsertBooking, InsertUser, users, subscriptions, InsertSubscription, Subscription } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -214,4 +214,52 @@ export async function getBookingStats() {
     todayCount: todayBookings.length,
     upcomingCount: upcoming.length,
   };
+}
+
+// ─── Subscription helpers ─────────────────────────────────────────────────────
+
+/**
+ * Returns the active subscription for a user, if any.
+ */
+export async function getActiveSubscription(userId: number): Promise<Subscription | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, userId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Creates or updates a subscription record after a successful Stripe subscription event.
+ */
+export async function upsertSubscription(data: InsertSubscription): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(subscriptions).values(data).onDuplicateKeyUpdate({
+    set: {
+      tier: data.tier,
+      status: data.status,
+      currentPeriodStart: data.currentPeriodStart,
+      currentPeriodEnd: data.currentPeriodEnd,
+      cancelledAt: data.cancelledAt,
+      updatedAt: new Date(),
+    },
+  });
+}
+
+/**
+ * Cancels a subscription by marking it as cancelled.
+ */
+export async function cancelSubscription(subscriptionId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(subscriptions)
+    .set({ status: "cancelled", cancelledAt: Date.now() })
+    .where(eq(subscriptions.stripeSubscriptionId, subscriptionId));
 }

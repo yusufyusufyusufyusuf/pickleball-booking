@@ -8,6 +8,8 @@ import Home from "./pages/Home";
 import BookingPage from "./pages/BookingPage";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import MembershipsPage from "./pages/MembershipsPage";
+import AccountMembershipPage from "./pages/AccountMembershipPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -17,6 +19,8 @@ function Router() {
       <Route path={"/book"} component={BookingPage} />
       <Route path={"/booking/confirmation"} component={ConfirmationPage} />
       <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/memberships"} component={MembershipsPage} />
+      <Route path={"/account/membership"} component={AccountMembershipPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

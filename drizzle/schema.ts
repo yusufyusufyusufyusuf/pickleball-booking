@@ -57,3 +57,32 @@ export const bookings = mysqlTable("bookings", {
 
 export type Booking = typeof bookings.$inferSelect;
 export type InsertBooking = typeof bookings.$inferInsert;
+
+/**
+ * Subscriptions table — tracks active Stripe subscriptions for membership tiers.
+ * One row per active subscription per user.
+ */
+export const subscriptions = mysqlTable("subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  /** User ID (foreign key to users.id) */
+  userId: int("userId").notNull(),
+  /** Stripe Subscription ID */
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }).notNull().unique(),
+  /** Stripe Customer ID */
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }).notNull(),
+  /** Membership tier: silver or gold */
+  tier: mysqlEnum("tier", ["silver", "gold"]).notNull(),
+  /** Subscription status: active, past_due, cancelled */
+  status: mysqlEnum("substatus", ["active", "past_due", "cancelled"]).default("active").notNull(),
+  /** Current period start (Unix timestamp in ms) */
+  currentPeriodStart: int("currentPeriodStart").notNull(),
+  /** Current period end (Unix timestamp in ms) */
+  currentPeriodEnd: int("currentPeriodEnd").notNull(),
+  /** Cancellation date if cancelled (Unix timestamp in ms) */
+  cancelledAt: int("cancelledAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;

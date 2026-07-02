@@ -1,6 +1,6 @@
 import { Express, Request, Response } from "express";
 import Stripe from "stripe";
-import { createBooking, getBookingBySessionId } from "./db";
+import { createBooking, getBookingBySessionId, upsertSubscription, cancelSubscription } from "./db";
 import { sendBookingConfirmation } from "./email";
 import { notifyOwner } from "./_core/notification";
 
@@ -125,6 +125,54 @@ export function registerStripeWebhook(app: Express) {
         } catch (err: any) {
           console.error("[Webhook] Failed to create booking:", err.message);
           return res.status(500).json({ error: "Failed to record booking" });
+        }
+      }
+
+      // Handle subscription events
+      if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = parseInt(subscription.metadata?.user_id || "", 10);
+
+        if (!userId || isNaN(userId)) {
+          console.warn("[Webhook] Subscription event missing user_id metadata");
+          return res.json({ received: true });
+        }
+
+        try {
+          const tier = (subscription.metadata?.tier || "silver") as "silver" | "gold";
+          await upsertSubscription({
+            userId,
+            stripeSubscriptionId: subscription.id,
+            stripeCustomerId: subscription.customer as string,
+            tier,
+            status: subscription.status as "active" | "past_due" | "cancelled",
+            currentPeriodStart: (subscription as any).current_period_start * 1000,
+            currentPeriodEnd: (subscription as any).current_period_end * 1000,
+            cancelledAt: subscription.canceled_at ? subscription.canceled_at * 1000 : null,
+          });
+          console.log(`[Webhook] Subscription ${subscription.id} recorded for user ${userId}`);
+
+          // Notify owner of new membership
+          if (event.type === "customer.subscription.created") {
+            notifyOwner({
+              title: `New ${tier} membership`,
+              content: `User #${userId} subscribed to ${tier} membership.`,
+            }).catch((e) => console.error("[Notification] Error:", e));
+          }
+        } catch (err: any) {
+          console.error("[Webhook] Failed to process subscription:", err.message);
+          return res.status(500).json({ error: "Failed to record subscription" });
+        }
+      }
+
+      if (event.type === "customer.subscription.deleted") {
+        const subscription = event.data.object as Stripe.Subscription;
+        try {
+          await cancelSubscription(subscription.id);
+          console.log(`[Webhook] Subscription ${subscription.id} marked as cancelled`);
+        } catch (err: any) {
+          console.error("[Webhook] Failed to cancel subscription:", err.message);
+          return res.status(500).json({ error: "Failed to cancel subscription" });
         }
       }
 

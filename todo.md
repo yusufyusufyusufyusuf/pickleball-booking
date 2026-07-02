@@ -62,3 +62,18 @@
 - [x] Call sendBookingConfirmation in Stripe webhook after booking is created
 - [x] Also send owner notification via notifyOwner on new booking
 - [x] Write Vitest test for email helper
+
+
+## Membership System (Stripe Subscriptions)
+- [x] Add `memberships` and `subscriptions` tables to drizzle/schema.ts
+- [x] Generate and apply migration SQL for membership tables
+- [x] Add membership query helpers to server/db.ts
+- [x] Create Stripe products/prices for Silver ($50/mo) and Gold ($100/mo)
+- [x] Add `memberships.createCheckoutSession` procedure for subscription checkout
+- [x] Add `memberships.getActiveSubscription` procedure (user's current membership)
+- [x] Add `memberships.cancelSubscription` procedure
+- [x] Add Stripe webhook handler for subscription events (customer.subscription.created, customer.subscription.updated, customer.subscription.deleted)
+- [x] Build /memberships page with tier cards and checkout buttons
+- [x] Build /account/membership page to view/manage active subscription
+- [x] Apply membership discount to booking prices (if applicable)
+- [x] Write Vitest tests for membership procedures
