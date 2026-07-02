@@ -208,7 +208,7 @@ export default function Home() {
       <footer className="border-t border-border py-6">
         <div className="container flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>© 2025 Pickleball Court. All rights reserved.</span>
-          <span>Secure payments powered by Stripe</span>
+          <span></span>
         </div>
       </footer>
     </div>
