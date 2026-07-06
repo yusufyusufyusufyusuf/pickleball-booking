@@ -311,7 +311,7 @@ function MembershipCard({ tier, icon, color, borderColor, iconBg, iconColor, per
         ))}
       </ul>
       <div className="mt-2 rounded-xl border border-dashed border-muted-foreground/30 bg-white/50 py-2.5 text-center text-xs font-medium text-muted-foreground">
-        Pricing announced soon
+        $100
       </div>
     </div>
   );
