@@ -77,3 +77,15 @@
 - [x] Build /account/membership page to view/manage active subscription
 - [x] Apply membership discount to booking prices (if applicable)
 - [x] Write Vitest tests for membership procedures
+
+## Player Sign-Up & Login
+- [x] Add password hash field to users table (or a separate player_accounts table)
+- [x] Generate and apply migration SQL
+- [x] Add `auth.register` public procedure (name, email, password → hashed, creates user)
+- [x] Add `auth.emailLogin` public procedure (email, password → session cookie)
+- [x] Build /signup page with name, email, password, confirm password fields
+- [x] Build /login page with email and password fields
+- [x] Add sign-up/login links to homepage nav
+- [x] Redirect to /book after successful login/signup
+- [x] Show logged-in user name in nav with logout button
+- [x] Write Vitest tests for register and login procedures

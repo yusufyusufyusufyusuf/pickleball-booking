@@ -263,3 +263,51 @@ export async function cancelSubscription(subscriptionId: string): Promise<void> 
     .set({ status: "cancelled", cancelledAt: Date.now() })
     .where(eq(subscriptions.stripeSubscriptionId, subscriptionId));
 }
+
+/**
+ * Returns a user by their email address. Used for email/password login.
+ */
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Creates a new local user with a hashed password.
+ */
+export async function createLocalUser(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  passwordHash: string;
+}): Promise<{ id: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Use email as openId for local accounts (prefixed to avoid collision with OAuth openIds)
+  const openId = `local_${data.email}`;
+  const result = await db.insert(users).values({
+    openId,
+    name: data.name,
+    email: data.email,
+    phone: data.phone ?? null,
+    passwordHash: data.passwordHash,
+    loginMethod: "email",
+    lastSignedIn: new Date(),
+  });
+  return { id: (result as any)[0]?.insertId ?? 0 };
+}
+
+/**
+ * Updates the lastSignedIn timestamp for a user.
+ */
+export async function touchUserSignIn(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, userId));
+}

@@ -1,10 +1,21 @@
 import { Link } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, CreditCard, ShieldCheck, ArrowRight, Star, Sparkles, Trophy, Zap, Bell } from "lucide-react";
+import { MapPin, Clock, CreditCard, ShieldCheck, ArrowRight, Star, Sparkles, Trophy, Zap, Bell, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 export default function Home() {
+  const { user, isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: () => {
+      utils.auth.me.invalidate();
+      window.location.href = "/";
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
@@ -19,15 +30,51 @@ export default function Home() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/admin">
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
-                Admin
-              </Button>
-            </Link>
+            {user?.role === "admin" && (
+              <Link href="/admin">
+                <Button variant="ghost" size="sm" className="text-muted-foreground">
+                  Admin
+                </Button>
+              </Link>
+            )}
+            {isAuthenticated ? (
+              <>
+                <Link href="/memberships">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hidden sm:inline-flex">
+                    Memberships
+                  </Button>
+                </Link>
+                <span className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <User className="w-3.5 h-3.5" />
+                  {user?.name?.split(" ")[0]}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground"
+                  onClick={() => logoutMutation.mutate()}
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button size="sm" className="gap-2">
+                    Sign Up
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </>
+            )}
             <Link href="/book">
-              <Button size="sm" className="gap-2">
+              <Button size="sm" variant="outline" className="gap-2 bg-background hidden md:inline-flex">
                 Book Now
-                <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
           </div>

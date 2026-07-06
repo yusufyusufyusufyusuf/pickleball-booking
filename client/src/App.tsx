@@ -10,6 +10,8 @@ import ConfirmationPage from "./pages/ConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import MembershipsPage from "./pages/MembershipsPage";
 import AccountMembershipPage from "./pages/AccountMembershipPage";
+import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -21,6 +23,8 @@ function Router() {
       <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/memberships"} component={MembershipsPage} />
       <Route path={"/account/membership"} component={AccountMembershipPage} />
+      <Route path={"/signup"} component={SignUpPage} />
+      <Route path={"/login"} component={LoginPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
