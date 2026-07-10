@@ -202,11 +202,15 @@ export async function getBookingStats() {
   const db = await getDb();
   if (!db) return { total: 0, revenue: 0, todayCount: 0, upcomingCount: 0 };
 
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = now.getFullYear() + '-' + 
+                String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(now.getDate()).padStart(2, '0');
+  
   const all = await db.select().from(bookings).where(eq(bookings.status, "confirmed"));
   const todayBookings = all.filter((b) => b.bookingDate === today);
-  const upcoming = all.filter((b) => b.bookingDate >= today);
-  const revenue = all.reduce((sum, b) => sum + b.amountPaid, 0);
+  const upcoming = all.filter((b) => b.bookingDate > today);
+  const revenue = all.reduce((sum, b) => sum + (b.amountPaid || 0), 0);
 
   return {
     total: all.length,

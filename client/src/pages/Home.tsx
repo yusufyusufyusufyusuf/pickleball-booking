@@ -202,6 +202,8 @@ export default function Home() {
                 iconBg="bg-slate-200"
                 iconColor="text-slate-600"
                 perks={["8 court hours / month", "Priority booking window", "Member-only rates"]}
+                price="$50/month"
+                status="active"
               />
               <MembershipCard
                 tier="Gold"
@@ -212,6 +214,8 @@ export default function Home() {
                 iconColor="text-amber-600"
                 featured
                 perks={["20 court hours / month", "48-hr advance booking", "Guest passes included", "Equipment locker"]}
+                price="$100/month"
+                status="active"
               />
               <MembershipCard
                 tier="Platinum"
@@ -221,6 +225,7 @@ export default function Home() {
                 iconBg="bg-primary/15"
                 iconColor="text-primary"
                 perks={["Unlimited court hours", "Instant booking anytime", "Unlimited guest passes", "Private coaching sessions"]}
+                status="coming-soon"
               />
             </div>
 
@@ -281,9 +286,11 @@ type MembershipCardProps = {
   iconColor: string;
   perks: string[];
   featured?: boolean;
+  price?: string;
+  status?: 'active' | 'coming-soon';
 };
 
-function MembershipCard({ tier, icon, color, borderColor, iconBg, iconColor, perks, featured }: MembershipCardProps) {
+function MembershipCard({ tier, icon, color, borderColor, iconBg, iconColor, perks, featured, price, status = 'coming-soon' }: MembershipCardProps) {
   return (
     <div
       className={`relative rounded-2xl border ${borderColor} bg-gradient-to-b ${color} p-6 flex flex-col gap-4 transition-transform duration-200 hover:-translate-y-1 ${
@@ -311,7 +318,7 @@ function MembershipCard({ tier, icon, color, borderColor, iconBg, iconColor, per
         ))}
       </ul>
       <div className="mt-2 rounded-xl border border-dashed border-muted-foreground/30 bg-white/50 py-2.5 text-center text-xs font-medium text-muted-foreground">
-        Coming Soon
+        {status === 'coming-soon' ? 'Coming Soon' : price}
       </div>
     </div>
   );
