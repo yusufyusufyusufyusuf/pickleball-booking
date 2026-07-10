@@ -50,6 +50,12 @@ export const membershipsRouter = router({
           mode: "subscription",
           customer_email: ctx.user.email || undefined,
           client_reference_id: ctx.user.id.toString(),
+          subscription_data: {
+            metadata: {
+              user_id: ctx.user.id.toString(),
+              tier: input.tier,
+            },
+          },
           metadata: {
             user_id: ctx.user.id.toString(),
             customer_email: ctx.user.email || "",

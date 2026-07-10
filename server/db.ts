@@ -1,4 +1,4 @@
-import { and, eq, gte, lte } from "drizzle-orm";
+import { eq, and, desc, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { bookings, InsertBooking, InsertUser, users, subscriptions, InsertSubscription, Subscription } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -231,7 +231,8 @@ export async function getActiveSubscription(userId: number): Promise<Subscriptio
   const result = await db
     .select()
     .from(subscriptions)
-    .where(eq(subscriptions.userId, userId))
+    .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
+    .orderBy(desc(subscriptions.updatedAt))
     .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
