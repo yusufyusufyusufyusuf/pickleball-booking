@@ -122,9 +122,11 @@ export const bookingsRouter = router({
         ],
         mode: "payment",
         customer_email: input.customerEmail,
+        client_reference_id: `booking_${Date.now()}`,
         success_url: `${origin}/booking/confirmation?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/book`,
         metadata: {
+          type: "booking",
           customerName: input.customerName,
           customerEmail: input.customerEmail,
           bookingDate: input.bookingDate,

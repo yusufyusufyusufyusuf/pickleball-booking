@@ -146,9 +146,9 @@ export function registerStripeWebhook(app: Express) {
             stripeCustomerId: subscription.customer as string,
             tier,
             status: subscription.status as "active" | "past_due" | "cancelled",
-            currentPeriodStart: (subscription as any).current_period_start * 1000,
-            currentPeriodEnd: (subscription as any).current_period_end * 1000,
-            cancelledAt: subscription.canceled_at ? subscription.canceled_at * 1000 : null,
+            currentPeriodStart: Math.floor((subscription as any).current_period_start * 1000),
+            currentPeriodEnd: Math.floor((subscription as any).current_period_end * 1000),
+            cancelledAt: subscription.canceled_at ? Math.floor(subscription.canceled_at * 1000) : null,
           });
           console.log(`[Webhook] Subscription ${subscription.id} recorded for user ${userId}`);
 

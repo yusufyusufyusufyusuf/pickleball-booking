@@ -76,7 +76,7 @@ export const subscriptions = mysqlTable("subscriptions", {
   /** Membership tier: silver or gold */
   tier: mysqlEnum("tier", ["silver", "gold"]).notNull(),
   /** Subscription status: active, past_due, cancelled */
-  status: mysqlEnum("substatus", ["active", "past_due", "cancelled"]).default("active").notNull(),
+  status: mysqlEnum("status", ["active", "past_due", "cancelled"]).default("active").notNull(),
   /** Current period start (Unix timestamp in ms) */
   currentPeriodStart: int("currentPeriodStart").notNull(),
   /** Current period end (Unix timestamp in ms) */
